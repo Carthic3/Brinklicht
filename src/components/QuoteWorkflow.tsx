@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { 
   FileText, 
   Upload, 
@@ -21,7 +22,8 @@ import {
   ArrowRight,
   ArrowLeft,
   FileCheck,
-  MessageCircle
+  MessageCircle,
+  BarChart3
 } from 'lucide-react';
 
 export interface Product {
@@ -68,9 +70,11 @@ const steps = [
   { id: 3, title: 'Product Verification', icon: Package },
   { id: 4, title: 'Deadline', icon: Calendar },
   { id: 5, title: 'Final Review', icon: CheckCircle },
+  { id: 6, title: 'Team Dashboard', icon: BarChart3 },
 ];
 
 export const QuoteWorkflow = () => {
+  const navigate = useNavigate();
   const [state, setState] = useState<WorkflowState>(initialState);
   const [tempClientInfo, setTempClientInfo] = useState<Partial<ClientInfo>>({});
   const [tempDeadline, setTempDeadline] = useState('');
@@ -82,7 +86,7 @@ export const QuoteWorkflow = () => {
   }, []);
 
   const nextStep = useCallback(() => {
-    setState(prev => ({ ...prev, step: Math.min(prev.step + 1, 5) }));
+    setState(prev => ({ ...prev, step: Math.min(prev.step + 1, 6) }));
   }, []);
 
   const prevStep = useCallback(() => {
@@ -174,12 +178,12 @@ export const QuoteWorkflow = () => {
   }, [tempDeadline, updateState, nextStep, toast]);
 
   const handleFinalSubmit = useCallback(() => {
-    updateState({ isCompleted: true });
     toast({
       title: "Quote Request Submitted",
       description: "Your quote request has been successfully submitted and will be processed shortly.",
     });
-  }, [updateState, toast]);
+    nextStep();
+  }, [toast, nextStep]);
 
   // Mock product extraction (in real app, this would call an API)
   const extractProducts = useCallback(() => {
@@ -684,6 +688,41 @@ export const QuoteWorkflow = () => {
                   </Button>
                 </div>
               </div>
+            </div>
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="text-center space-y-6 p-8">
+            <div className="w-16 h-16 mx-auto bg-success/10 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-8 h-8 text-success" />
+            </div>
+            
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold text-foreground">Request Submitted Successfully!</h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Your quote request has been submitted and is now in the system. You can now access the team dashboard to monitor progress.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                variant="professional"
+                size="lg"
+              >
+                <BarChart3 className="w-5 h-5 mr-2" />
+                Access Team Dashboard
+              </Button>
+              
+              <Button 
+                onClick={() => setState(initialState)}
+                variant="outline"
+                size="lg"
+              >
+                Start New Request
+              </Button>
             </div>
           </div>
         );

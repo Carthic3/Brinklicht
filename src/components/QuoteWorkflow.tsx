@@ -418,7 +418,7 @@ export const QuoteWorkflow = () => {
           <div className="space-y-6">
             <div className="text-center space-y-2">
               <Package className="h-12 w-12 text-primary mx-auto" />
-              <h2 className="text-2xl font-semibold text-foreground">Product Verification</h2>
+              <h2 className="text-2xl font-semibold text-foreground">Product SKU Verification</h2>
               <p className="text-muted-foreground">
                 Please verify the extracted products and confirm quantities
               </p>

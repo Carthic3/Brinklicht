@@ -729,7 +729,7 @@ export const QuoteWorkflow = () => {
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold text-foreground">Professional Quote Request</h1>
+          <h1 className="text-3xl font-bold text-foreground">Brinklicht Intake Assistant</h1>
           <p className="text-muted-foreground">
             Get accurate quotes for your business needs in just a few simple steps
           </p>

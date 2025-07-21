@@ -183,7 +183,7 @@ export const QuoteWorkflow = () => {
             if (products && Array.isArray(products) && products.length > 0) {
               const extractedProducts = products.map((product: any, index: number) => ({
                 id: `product-${index}`,
-                brand: product.brand_name || product.Brand_Name || product.brandName || 'N/A',
+                brand: product.BrandName || product.brand_name || product.Brand_Name || product.brandName || 'N/A',
                 type: product.light_type || product.Light_Type || product.lightType || 'Unknown',
                 sku: product.SKU || product.sku,
                 quantity: product.quantity || product.Quantity || 1,

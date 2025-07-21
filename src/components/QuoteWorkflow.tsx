@@ -93,15 +93,42 @@ export const QuoteWorkflow = () => {
     setState(prev => ({ ...prev, step: Math.max(prev.step - 1, 1) }));
   }, []);
 
-  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setUploadedFile(file);
       updateState({ hasDocument: true });
-      toast({
-        title: "Document uploaded successfully",
-        description: `${file.name} has been uploaded and is ready for processing.`,
-      });
+      
+      // Send file to n8n webhook
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('https://miraigen.app.n8n.cloud/webhook-test/d03cdead-f1e5-4e7b-8192-bdeb12d9ca9c', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          toast({
+            title: "Document uploaded successfully",
+            description: `${file.name} has been uploaded and sent for processing.`,
+          });
+        } else {
+          toast({
+            title: "Document uploaded locally",
+            description: `${file.name} uploaded but couldn't send to processing service.`,
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Error sending file to n8n:', error);
+        toast({
+          title: "Document uploaded locally",
+          description: `${file.name} uploaded but couldn't send to processing service.`,
+          variant: "destructive",
+        });
+      }
     }
   }, [updateState, toast]);
 

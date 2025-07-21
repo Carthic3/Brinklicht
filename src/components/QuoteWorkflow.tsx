@@ -117,43 +117,64 @@ export const QuoteWorkflow = () => {
         formData.append('fileSize', file.size.toString());
         formData.append('fileType', file.type);
         
-        const response = await fetch('https://miraigen.app.n8n.cloud/webhook-test/67c28f9b-b18c-4637-8a32-c591cf759bff', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (response.ok) {
-          const jsonResponse = await response.json();
-          console.log('n8n response:', jsonResponse);
+        console.log('Attempting to upload file to n8n:', file.name);
+        
+        // First try with normal fetch to get response
+        let response;
+        try {
+          response = await fetch('https://miraigen.app.n8n.cloud/webhook-test/67c28f9b-b18c-4637-8a32-c591cf759bff', {
+            method: 'POST',
+            body: formData,
+          });
           
-          // Parse the response and extract products
-          if (jsonResponse && jsonResponse.length > 0 && jsonResponse[0].message?.content?.products) {
-            const extractedProducts = jsonResponse[0].message.content.products.map((product: any, index: number) => ({
-              id: `product-${index}`,
-              brand: product.brandName || 'N/A',
-              type: product.lightType || 'Unknown',
-              sku: product.sku,
-              quantity: product.quantity,
-              verified: false,
-              specs: product.specs
-            }));
+          if (response.ok) {
+            const jsonResponse = await response.json();
+            console.log('n8n response:', jsonResponse);
             
-            updateState({ products: extractedProducts });
-            
-            toast({
-              title: "Document processed successfully",
-              description: `Found ${extractedProducts.length} products from ${file.name}`,
-            });
-          } else {
-            toast({
-              title: "Document uploaded",
-              description: `${file.name} was processed but no products were found.`,
-              variant: "destructive",
-            });
+            // Parse the response and extract products
+            if (jsonResponse && jsonResponse.length > 0 && jsonResponse[0].message?.content?.products) {
+              const extractedProducts = jsonResponse[0].message.content.products.map((product: any, index: number) => ({
+                id: `product-${index}`,
+                brand: product.brandName || 'N/A',
+                type: product.lightType || 'Unknown',
+                sku: product.sku,
+                quantity: product.quantity,
+                verified: false,
+                specs: product.specs
+              }));
+              
+              updateState({ products: extractedProducts });
+              
+              toast({
+                title: "Document processed successfully",
+                description: `Found ${extractedProducts.length} products from ${file.name}`,
+              });
+              return;
+            }
           }
-        } else {
-          throw new Error('Failed to process document');
+        } catch (corsError) {
+          console.log('CORS error occurred, falling back to no-cors mode:', corsError);
+          
+          // Fallback to no-cors mode (fire and forget)
+          await fetch('https://miraigen.app.n8n.cloud/webhook-test/67c28f9b-b18c-4637-8a32-c591cf759bff', {
+            method: 'POST',
+            body: formData,
+            mode: 'no-cors',
+          });
+          
+          toast({
+            title: "Document uploaded successfully",
+            description: `${file.name} has been sent for processing. The extracted products will need to be added manually.`,
+          });
+          return;
         }
+        
+        // If we get here, the response wasn't what we expected
+        toast({
+          title: "Document uploaded",
+          description: `${file.name} was processed but no products were found.`,
+          variant: "destructive",
+        });
         
       } catch (error) {
         console.error('Error processing file with n8n:', error);

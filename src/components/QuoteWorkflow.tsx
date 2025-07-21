@@ -41,6 +41,12 @@ export interface Product {
     direction?: string;
     length?: string;
     power?: string;
+    colorTemperature?: string;
+    color?: string;
+    mountType?: string;
+    lumen?: string;
+    cri?: string;
+    dimensions?: string;
     components?: Array<{
       sku: string;
       description: string;
@@ -187,15 +193,27 @@ export const QuoteWorkflow = () => {
               const extractedProducts = products.map((product: any, index: number) => ({
                 id: `product-${index}`,
                 brand: product.BrandName || product.brand_name || product.Brand_Name || product.brandName || 'N/A',
-                type: product.light_type || product.Light_Type || product.lightType || 'Unknown',
-                sku: product.SKU || product.sku,
+                type: product.LightType || product.light_type || product.Light_Type || product.lightType || 'Unknown',
+                sku: Array.isArray(product.SKU) ? product.SKU.join(', ') : (product.SKU || product.sku),
                 quantity: product.quantity || product.Quantity || 1,
                 verified: false,
                 specs: {
-                  wattage: product.wattage,
-                  dimming: product.dimming,
-                  direction: product.direction,
-                  components: product.components?.map((comp: any) => ({
+                  wattage: product.Specs?.PowerConsumption || product.PowerConsumption || product.wattage,
+                  dimming: product.Specs?.Dimmable || product.Dimmable || product.dimming,
+                  direction: product.Specs?.direction || product.direction,
+                  colorTemperature: product.Specs?.ColorTemperature || product.ColorTemperature,
+                  color: product.Specs?.Color || product.Color,
+                  mountType: product.Specs?.MountType || product.MountType,
+                  lumen: product.Specs?.Lumen || product.Lumen,
+                  cri: product.Specs?.CRI || product.CRI,
+                  dimensions: product.Specs?.Dimensions || product.Dimensions,
+                  components: product.Components?.map((comp: any) => ({
+                    sku: comp.SKU || comp.sku,
+                    description: comp.Component_Type || comp.description,
+                    length: comp.Length || comp.length,
+                    power: comp.power,
+                    quantity: comp.Quantity || comp.quantity
+                  })) || product.components?.map((comp: any) => ({
                     sku: comp.SKU || comp.sku,
                     description: comp.description,
                     length: comp.length,
@@ -623,11 +641,11 @@ export const QuoteWorkflow = () => {
                           {product.specs && (
                             <div className="space-y-2">
                               {/* Basic specs row */}
-                              {(product.specs.dimming || product.specs.wattage || product.specs.direction) && (
+                              {(product.specs.dimming || product.specs.wattage || product.specs.direction || product.specs.colorTemperature || product.specs.color || product.specs.mountType) && (
                                 <div className="flex flex-wrap gap-2">
                                   {product.specs.wattage && (
                                     <Badge variant="secondary" className="text-xs">
-                                      {product.specs.wattage}
+                                      {Array.isArray(product.specs.wattage) ? product.specs.wattage.join(', ') : product.specs.wattage}
                                     </Badge>
                                   )}
                                   {product.specs.dimming && (
@@ -638,6 +656,36 @@ export const QuoteWorkflow = () => {
                                   {product.specs.direction && (
                                     <Badge variant="secondary" className="text-xs">
                                       {product.specs.direction}
+                                    </Badge>
+                                  )}
+                                  {product.specs.colorTemperature && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {product.specs.colorTemperature}
+                                    </Badge>
+                                  )}
+                                  {product.specs.color && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {product.specs.color}
+                                    </Badge>
+                                  )}
+                                  {product.specs.mountType && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {Array.isArray(product.specs.mountType) ? product.specs.mountType.join(', ') : product.specs.mountType}
+                                    </Badge>
+                                  )}
+                                  {product.specs.lumen && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {Array.isArray(product.specs.lumen) ? product.specs.lumen.join(', ') : product.specs.lumen}
+                                    </Badge>
+                                  )}
+                                  {product.specs.cri && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      CRI: {product.specs.cri}
+                                    </Badge>
+                                  )}
+                                  {product.specs.dimensions && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {Array.isArray(product.specs.dimensions) ? product.specs.dimensions.join(', ') : product.specs.dimensions}
                                     </Badge>
                                   )}
                                 </div>

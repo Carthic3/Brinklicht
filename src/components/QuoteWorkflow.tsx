@@ -23,7 +23,8 @@ import {
   ArrowLeft,
   FileCheck,
   MessageCircle,
-  BarChart3
+  BarChart3,
+  Loader2
 } from 'lucide-react';
 
 export interface Product {
@@ -99,6 +100,7 @@ export const QuoteWorkflow = () => {
   const [tempClientInfo, setTempClientInfo] = useState<Partial<ClientInfo>>({});
   const [tempDeadline, setTempDeadline] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
   const updateState = useCallback((updates: Partial<WorkflowState>) => {
@@ -123,6 +125,7 @@ export const QuoteWorkflow = () => {
     if (file) {
       setUploadedFile(file);
       updateState({ hasDocument: true });
+      setIsProcessing(true);
       
       // Send file to n8n webhook and expect JSON response
       try {
@@ -215,6 +218,7 @@ export const QuoteWorkflow = () => {
                 title: "Document processed successfully",
                 description: `Found ${extractedProducts.length} products from ${file.name}. You can now proceed to verification.`,
               });
+              setIsProcessing(false);
               return;
             } else {
               console.log('No products found in any expected location');
@@ -236,6 +240,7 @@ export const QuoteWorkflow = () => {
             title: "Document uploaded successfully",
             description: `${file.name} has been sent for processing. The extracted products will need to be added manually.`,
           });
+          setIsProcessing(false);
           return;
         }
         
@@ -245,6 +250,7 @@ export const QuoteWorkflow = () => {
           description: `${file.name} was processed but no products were found.`,
           variant: "destructive",
         });
+        setIsProcessing(false);
         
       } catch (error) {
         console.error('Error processing file with n8n:', error);
@@ -253,6 +259,7 @@ export const QuoteWorkflow = () => {
           description: `Failed to process ${file.name}. Please try again.`,
           variant: "destructive",
         });
+        setIsProcessing(false);
       }
     }
   }, [updateState, toast]);
@@ -1031,7 +1038,20 @@ export const QuoteWorkflow = () => {
 
         {/* Main Content */}
         <Card className="shadow-lg">
-          <CardContent className="p-8">
+          <CardContent className="p-8 relative">
+            {isProcessing && (
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
+                <div className="text-center space-y-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">Processing Document...</h3>
+                    <p className="text-sm text-muted-foreground">
+                      AI is extracting products from your document. This may take a few seconds.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             {renderStepContent()}
           </CardContent>
         </Card>

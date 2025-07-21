@@ -34,6 +34,16 @@ export interface Product {
   quantity: number;
   url?: string;
   verified: boolean;
+  specs?: {
+    dimming?: string;
+    wattage?: number;
+    driver?: string;
+    additional?: Array<{
+      sku: string;
+      name: string;
+      quantity: number;
+    }>;
+  };
 }
 
 export interface ClientInfo {
@@ -99,7 +109,7 @@ export const QuoteWorkflow = () => {
       setUploadedFile(file);
       updateState({ hasDocument: true });
       
-      // Send file to n8n webhook
+      // Send file to n8n webhook and expect JSON response
       try {
         const formData = new FormData();
         formData.append('file', file);
@@ -110,20 +120,46 @@ export const QuoteWorkflow = () => {
         const response = await fetch('https://miraigen.app.n8n.cloud/webhook-test/67c28f9b-b18c-4637-8a32-c591cf759bff', {
           method: 'POST',
           body: formData,
-          mode: 'no-cors', // Handle CORS issues
         });
 
-        // Since we're using no-cors, we can't check response status
-        toast({
-          title: "Document uploaded successfully",
-          description: `${file.name} has been uploaded and sent for processing.`,
-        });
+        if (response.ok) {
+          const jsonResponse = await response.json();
+          console.log('n8n response:', jsonResponse);
+          
+          // Parse the response and extract products
+          if (jsonResponse && jsonResponse.length > 0 && jsonResponse[0].message?.content?.products) {
+            const extractedProducts = jsonResponse[0].message.content.products.map((product: any, index: number) => ({
+              id: `product-${index}`,
+              brand: product.brandName || 'N/A',
+              type: product.lightType || 'Unknown',
+              sku: product.sku,
+              quantity: product.quantity,
+              verified: false,
+              specs: product.specs
+            }));
+            
+            updateState({ products: extractedProducts });
+            
+            toast({
+              title: "Document processed successfully",
+              description: `Found ${extractedProducts.length} products from ${file.name}`,
+            });
+          } else {
+            toast({
+              title: "Document uploaded",
+              description: `${file.name} was processed but no products were found.`,
+              variant: "destructive",
+            });
+          }
+        } else {
+          throw new Error('Failed to process document');
+        }
         
       } catch (error) {
-        console.error('Error sending file to n8n:', error);
+        console.error('Error processing file with n8n:', error);
         toast({
-          title: "Document uploaded locally",
-          description: `${file.name} uploaded but couldn't send to processing service.`,
+          title: "Upload error",
+          description: `Failed to process ${file.name}. Please try again.`,
           variant: "destructive",
         });
       }
@@ -210,35 +246,32 @@ export const QuoteWorkflow = () => {
     nextStep();
   }, [toast, nextStep]);
 
-  // Mock product extraction (in real app, this would call an API)
+  // Extract products from text input
   const extractProducts = useCallback(() => {
-    const mockProducts: Product[] = [
-      {
-        id: '1',
-        brand: 'Dell',
-        type: 'Laptop',
-        sku: 'XPS-13-9310',
+    if (state.documentContent.trim()) {
+      // For text input, create a simple product entry
+      const textProduct: Product = {
+        id: 'text-input-1',
+        brand: 'Manual Entry',
+        type: 'Custom Product',
+        sku: 'MANUAL-001',
         quantity: 1,
-        url: 'https://www.dell.com/en-us/shop/dell-laptops/xps-13-laptop/spd/xps-13-9310-laptop',
         verified: false,
-      },
-      {
-        id: '2',
-        brand: 'HP',
-        type: 'Printer',
-        sku: 'LaserJet-Pro-M404n',
-        quantity: 1,
-        url: 'https://www.hp.com/us-en/shop/pdp/hp-laserjet-pro-m404n-printer',
-        verified: false,
-      },
-    ];
+      };
 
-    updateState({ products: mockProducts });
-    toast({
-      title: "Products extracted",
-      description: `Found ${mockProducts.length} products. Please verify each item.`,
-    });
-  }, [updateState, toast]);
+      updateState({ products: [textProduct] });
+      toast({
+        title: "Product created from text",
+        description: "Please verify and update the product details.",
+      });
+    } else {
+      toast({
+        title: "No content found",
+        description: "Please enter product information in the text area.",
+        variant: "destructive",
+      });
+    }
+  }, [state.documentContent, updateState, toast]);
 
   const currentStepProgress = ((state.step - 1) / (steps.length - 1)) * 100;
 
@@ -480,11 +513,54 @@ export const QuoteWorkflow = () => {
                   }`}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-2">
+                        <div className="flex-1 space-y-3">
                           <div className="flex items-center gap-2">
                             <h4 className="font-semibold">{product.brand} {product.type}</h4>
                             <Badge variant="outline">{product.sku}</Badge>
                           </div>
+                          
+                          {/* Product Specs */}
+                          {product.specs && (
+                            <div className="space-y-2">
+                              {(product.specs.dimming || product.specs.wattage || product.specs.driver) && (
+                                <div className="flex flex-wrap gap-2">
+                                  {product.specs.dimming && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      Dimming: {product.specs.dimming}
+                                    </Badge>
+                                  )}
+                                  {product.specs.wattage && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {product.specs.wattage}W
+                                    </Badge>
+                                  )}
+                                  {product.specs.driver && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {product.specs.driver}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+                              
+                              {/* Additional components */}
+                              {product.specs.additional && product.specs.additional.length > 0 && (
+                                <div className="mt-3 p-3 bg-accent/50 rounded-md">
+                                  <h5 className="text-sm font-medium mb-2">Additional Components:</h5>
+                                  <div className="space-y-1">
+                                    {product.specs.additional.map((item, index) => (
+                                      <div key={index} className="flex justify-between items-center text-sm">
+                                        <span className="flex items-center gap-2">
+                                          <Badge variant="outline" className="text-xs">{item.sku}</Badge>
+                                          {item.name}
+                                        </span>
+                                        <span className="text-muted-foreground">Qty: {item.quantity}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
                           
                           {product.url && (
                             <a 

@@ -38,6 +38,13 @@ export interface Product {
     dimming?: string;
     wattage?: number;
     driver?: string;
+    color?: string;
+    totalPrice?: number;
+    profile?: string;
+    ledFlex?: string;
+    endCap?: string;
+    powerSupply?: string;
+    fixationSet?: string;
     additional?: Array<{
       sku: string;
       name: string;
@@ -163,12 +170,23 @@ export const QuoteWorkflow = () => {
             if (products && Array.isArray(products) && products.length > 0) {
               const extractedProducts = products.map((product: any, index: number) => ({
                 id: `product-${index}`,
-                brand: product.brandName || product.brand || 'N/A',
-                type: product.lightType || product.type || 'Unknown',
-                sku: product.sku,
-                quantity: product.quantity || 1,
+                brand: product.Brand_Name || product.brandName || product.brand || 'N/A',
+                type: product.Light_Type || product.lightType || product.type || 'Unknown',
+                sku: product.SKU || product.sku,
+                quantity: product.Quantity || product.quantity || 1,
                 verified: false,
-                specs: product.specs
+                specs: {
+                  dimming: product.Specs?.DIM || product.specs?.dimming,
+                  wattage: product.Specs?.Price_per_unit || product.specs?.wattage,
+                  driver: product.Specs?.Driver || product.specs?.driver,
+                  color: product.Specs?.Color || product.specs?.color,
+                  totalPrice: product.Specs?.Total_Price || product.specs?.totalPrice,
+                  profile: product.Specs?.Profile || product.specs?.profile,
+                  ledFlex: product.Specs?.LED_Flex || product.specs?.ledFlex,
+                  endCap: product.Specs?.End_Cap || product.specs?.endCap,
+                  powerSupply: product.Specs?.Power_Supply || product.specs?.powerSupply,
+                  fixationSet: product.Specs?.Fixation_Set || product.specs?.fixationSet
+                }
               }));
               
               updateState({ products: extractedProducts });
@@ -574,16 +592,27 @@ export const QuoteWorkflow = () => {
                           {/* Product Specs */}
                           {product.specs && (
                             <div className="space-y-2">
-                              {(product.specs.dimming || product.specs.wattage || product.specs.driver) && (
+                              {/* Basic specs row */}
+                              {(product.specs.dimming || product.specs.wattage || product.specs.driver || product.specs.color) && (
                                 <div className="flex flex-wrap gap-2">
                                   {product.specs.dimming && (
                                     <Badge variant="secondary" className="text-xs">
                                       Dimming: {product.specs.dimming}
                                     </Badge>
                                   )}
+                                  {product.specs.color && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      Color: {product.specs.color}
+                                    </Badge>
+                                  )}
                                   {product.specs.wattage && (
                                     <Badge variant="secondary" className="text-xs">
-                                      {product.specs.wattage}W
+                                      Price: €{product.specs.wattage}
+                                    </Badge>
+                                  )}
+                                  {product.specs.totalPrice && (
+                                    <Badge variant="secondary" className="text-xs font-semibold">
+                                      Total: €{product.specs.totalPrice}
                                     </Badge>
                                   )}
                                   {product.specs.driver && (
@@ -594,7 +623,46 @@ export const QuoteWorkflow = () => {
                                 </div>
                               )}
                               
-                              {/* Additional components */}
+                              {/* Technical details for FEMTOLINE products */}
+                              {(product.specs.profile || product.specs.ledFlex || product.specs.endCap || product.specs.powerSupply || product.specs.fixationSet) && (
+                                <div className="mt-3 p-3 bg-accent/50 rounded-md">
+                                  <h5 className="text-sm font-medium mb-2">Technical Specifications:</h5>
+                                  <div className="grid grid-cols-1 gap-1 text-xs">
+                                    {product.specs.profile && (
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Profile:</span>
+                                        <span>{product.specs.profile}</span>
+                                      </div>
+                                    )}
+                                    {product.specs.ledFlex && (
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">LED Flex:</span>
+                                        <span>{product.specs.ledFlex}</span>
+                                      </div>
+                                    )}
+                                    {product.specs.endCap && (
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">End Cap:</span>
+                                        <span>{product.specs.endCap}</span>
+                                      </div>
+                                    )}
+                                    {product.specs.powerSupply && (
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Power Supply:</span>
+                                        <span>{product.specs.powerSupply}</span>
+                                      </div>
+                                    )}
+                                    {product.specs.fixationSet && (
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Fixation Set:</span>
+                                        <span>{product.specs.fixationSet}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Additional components (keeping the original logic) */}
                               {product.specs.additional && product.specs.additional.length > 0 && (
                                 <div className="mt-3 p-3 bg-accent/50 rounded-md">
                                   <h5 className="text-sm font-medium mb-2">Additional Components:</h5>

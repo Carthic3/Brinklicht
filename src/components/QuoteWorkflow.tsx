@@ -107,7 +107,7 @@ export const QuoteWorkflow = () => {
         formData.append('fileSize', file.size.toString());
         formData.append('fileType', file.type);
         
-        const response = await fetch('https://miraigen.app.n8n.cloud/webhook-test/d03cdead-f1e5-4e7b-8192-bdeb12d9ca9c', {
+        const response = await fetch('https://miraigen.app.n8n.cloud/webhook-test/67c28f9b-b18c-4637-8a32-c591cf759bff', {
           method: 'POST',
           body: formData,
           mode: 'no-cors', // Handle CORS issues

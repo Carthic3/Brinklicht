@@ -129,16 +129,44 @@ export const QuoteWorkflow = () => {
           
           if (response.ok) {
             const jsonResponse = await response.json();
-            console.log('n8n response:', jsonResponse);
+            console.log('Full n8n response:', JSON.stringify(jsonResponse, null, 2));
+            console.log('Response type:', typeof jsonResponse);
+            console.log('Is array:', Array.isArray(jsonResponse));
             
-            // Parse the response and extract products
-            if (jsonResponse && jsonResponse.length > 0 && jsonResponse[0].message?.content?.products) {
-              const extractedProducts = jsonResponse[0].message.content.products.map((product: any, index: number) => ({
+            // More flexible parsing - handle different response structures
+            let products = null;
+            
+            // Try different possible response structures
+            if (Array.isArray(jsonResponse) && jsonResponse.length > 0) {
+              // Original expected format: [{message: {content: {products: [...]}}}]
+              if (jsonResponse[0].message?.content?.products) {
+                products = jsonResponse[0].message.content.products;
+                console.log('Found products in message.content.products:', products);
+              }
+              // Direct array format: [{products: [...]}]
+              else if (jsonResponse[0].products) {
+                products = jsonResponse[0].products;
+                console.log('Found products in direct products array:', products);
+              }
+            }
+            // Direct products array: {products: [...]}
+            else if (jsonResponse.products) {
+              products = jsonResponse.products;
+              console.log('Found products in direct products object:', products);
+            }
+            // Direct array of products: [{sku: ..., quantity: ...}, ...]
+            else if (Array.isArray(jsonResponse) && jsonResponse[0]?.sku) {
+              products = jsonResponse;
+              console.log('Found direct products array:', products);
+            }
+            
+            if (products && Array.isArray(products) && products.length > 0) {
+              const extractedProducts = products.map((product: any, index: number) => ({
                 id: `product-${index}`,
-                brand: product.brandName || 'N/A',
-                type: product.lightType || 'Unknown',
+                brand: product.brandName || product.brand || 'N/A',
+                type: product.lightType || product.type || 'Unknown',
                 sku: product.sku,
-                quantity: product.quantity,
+                quantity: product.quantity || 1,
                 verified: false,
                 specs: product.specs
               }));
@@ -150,6 +178,9 @@ export const QuoteWorkflow = () => {
                 description: `Found ${extractedProducts.length} products from ${file.name}`,
               });
               return;
+            } else {
+              console.log('No products found in any expected location');
+              console.log('Available keys in response:', Object.keys(jsonResponse));
             }
           }
         } catch (corsError) {

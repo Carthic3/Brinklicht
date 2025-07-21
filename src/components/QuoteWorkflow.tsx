@@ -99,7 +99,12 @@ export const QuoteWorkflow = () => {
   const { toast } = useToast();
 
   const updateState = useCallback((updates: Partial<WorkflowState>) => {
-    setState(prev => ({ ...prev, ...updates }));
+    console.log('Updating state with:', updates);
+    setState(prev => {
+      const newState = { ...prev, ...updates };
+      console.log('New state after update:', newState);
+      return newState;
+    });
   }, []);
 
   const nextStep = useCallback(() => {
@@ -166,6 +171,11 @@ export const QuoteWorkflow = () => {
               products = jsonResponse;
               console.log('Found direct products array:', products);
             }
+            // Handle single response object format
+            else if (jsonResponse.message?.content?.products) {
+              products = jsonResponse.message.content.products;
+              console.log('Found products in single message.content.products:', products);
+            }
             
             if (products && Array.isArray(products) && products.length > 0) {
               const extractedProducts = products.map((product: any, index: number) => ({
@@ -189,16 +199,18 @@ export const QuoteWorkflow = () => {
                 }
               }));
               
+              console.log('Successfully parsed products:', extractedProducts);
               updateState({ products: extractedProducts });
               
               toast({
                 title: "Document processed successfully",
-                description: `Found ${extractedProducts.length} products from ${file.name}`,
+                description: `Found ${extractedProducts.length} products from ${file.name}. You can now proceed to verification.`,
               });
               return;
             } else {
               console.log('No products found in any expected location');
               console.log('Available keys in response:', Object.keys(jsonResponse));
+              console.log('Full response structure:', jsonResponse);
             }
           }
         } catch (corsError) {
@@ -546,6 +558,8 @@ export const QuoteWorkflow = () => {
         );
 
       case 3:
+        console.log('Rendering step 3 - Current state:', state);
+        console.log('Products in state:', state.products);
         return (
           <div className="space-y-6">
             <div className="text-center space-y-2">

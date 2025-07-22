@@ -161,7 +161,11 @@ export const QuoteWorkflow = () => {
             let products = null;
             
             // Handle single object response (not array) - this should be first since that's the current format
-            if (jsonResponse.message?.content?.Products) {
+            if (jsonResponse.message?.content?.OrderDetails) {
+              products = jsonResponse.message.content.OrderDetails;
+              console.log('Found products in single object message.content.OrderDetails:', products);
+            }
+            else if (jsonResponse.message?.content?.Products) {
               products = jsonResponse.message.content.Products;
               console.log('Found products in single object message.content.Products:', products);
             }
@@ -171,8 +175,13 @@ export const QuoteWorkflow = () => {
             }
             // Try different possible response structures
             else if (Array.isArray(jsonResponse) && jsonResponse.length > 0) {
+              // New n8n format: [{message: {content: {OrderDetails: [...]}}}]
+              if (jsonResponse[0].message?.content?.OrderDetails) {
+                products = jsonResponse[0].message.content.OrderDetails;
+                console.log('Found products in message.content.OrderDetails:', products);
+              }
               // New n8n format: [{message: {content: {Products: [...]}}}] (capital P)
-              if (jsonResponse[0].message?.content?.Products) {
+              else if (jsonResponse[0].message?.content?.Products) {
                 products = jsonResponse[0].message.content.Products;
                 console.log('Found products in message.content.Products:', products);
               }
@@ -217,14 +226,14 @@ export const QuoteWorkflow = () => {
                 const extractedProduct = {
                   id: `product-${index}`,
                   brand: product["Brand Name"] || product.BrandName || product.brand_name || product.Brand_Name || product.brandName || 'N/A',
-                  type: product["Light Type"] || product.LightType || product.light_type || product.Light_Type || product.lightType || 'Unknown',
+                  type: product.Specifications?.Type || product["Light Type"] || product.LightType || product.light_type || product.Light_Type || product.lightType || 'Unknown',
                   sku: Array.isArray(product.SKU) ? product.SKU.join(', ') : (product.SKU || product.sku),
                   quantity: product.Quantity || product.quantity || 1,
                   verified: false,
                   specs: {
                     // Handle both new format (Specifications object) and old format (direct properties)
                     wattage: (() => {
-                      const power = product.Specifications?.Power || product.Specs?.PowerConsumption || product.PowerConsumption || product.Power || product.wattage;
+                      const power = product.Specifications?.Wattage || product.Specifications?.Power || product.Specs?.PowerConsumption || product.PowerConsumption || product.Power || product.wattage;
                       if (typeof power === 'object' && power !== null) {
                         // Handle object format like {"D1": "24 W", "D2": "49.5 W"}
                         return Object.values(power).join(', ');

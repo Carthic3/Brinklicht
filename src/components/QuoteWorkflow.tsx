@@ -157,6 +157,16 @@ export const QuoteWorkflow = () => {
             console.log('Response type:', typeof jsonResponse);
             console.log('Is array:', Array.isArray(jsonResponse));
             
+            // Add more detailed debugging
+            if (Array.isArray(jsonResponse) && jsonResponse.length > 0) {
+              console.log('First element:', jsonResponse[0]);
+              console.log('First element message:', jsonResponse[0].message);
+              console.log('First element content:', jsonResponse[0].message?.content);
+            } else {
+              console.log('Direct response message:', jsonResponse.message);
+              console.log('Direct response content:', jsonResponse.message?.content);
+            }
+            
             // More flexible parsing - handle different response structures
             let products = null;
             
@@ -211,6 +221,10 @@ export const QuoteWorkflow = () => {
               products = jsonResponse.message.content.products;
               console.log('Found products in single message.content.products:', products);
             }
+            
+            console.log('Final products after parsing:', products);
+            console.log('Products is array:', Array.isArray(products));
+            console.log('Products length:', products?.length);
             
             if (products && Array.isArray(products) && products.length > 0) {
               console.log('Processing products:', products);
@@ -311,6 +325,25 @@ export const QuoteWorkflow = () => {
               console.log('No products found in any expected location');
               console.log('Available keys in response:', Object.keys(jsonResponse));
               console.log('Full response structure:', jsonResponse);
+              
+              // Add more detailed debugging for failed parsing
+              if (Array.isArray(jsonResponse) && jsonResponse.length > 0) {
+                console.log('Response is array, first element keys:', Object.keys(jsonResponse[0]));
+                if (jsonResponse[0].message) {
+                  console.log('Message keys:', Object.keys(jsonResponse[0].message));
+                  if (jsonResponse[0].message.content) {
+                    console.log('Content keys:', Object.keys(jsonResponse[0].message.content));
+                  }
+                }
+              } else {
+                console.log('Response is not array or is empty');
+                if (jsonResponse.message) {
+                  console.log('Message keys:', Object.keys(jsonResponse.message));
+                  if (jsonResponse.message.content) {
+                    console.log('Content keys:', Object.keys(jsonResponse.message.content));
+                  }
+                }
+              }
             }
           }
         } catch (corsError) {

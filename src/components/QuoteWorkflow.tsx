@@ -209,7 +209,14 @@ export const QuoteWorkflow = () => {
                   verified: false,
                   specs: {
                     // Handle both new format (Specifications object) and old format (direct properties)
-                    wattage: product.Specifications?.Power || product.Specs?.PowerConsumption || product.PowerConsumption || product.Power || product.wattage,
+                    wattage: (() => {
+                      const power = product.Specifications?.Power || product.Specs?.PowerConsumption || product.PowerConsumption || product.Power || product.wattage;
+                      if (typeof power === 'object' && power !== null) {
+                        // Handle object format like {"D1": "24 W", "D2": "49.5 W"}
+                        return Object.values(power).join(', ');
+                      }
+                      return power;
+                    })(),
                     dimming: product.Specifications?.Dimmable || product.Specs?.Dimmable || product.Dimmable || product.dimming,
                     direction: product.Specifications?.direction || product.Specs?.direction || product.direction,
                     colorTemperature: product.Specifications?.["Color Temperature"] || product.Specs?.ColorTemperature || product.ColorTemperature || product["Color Temperature"],

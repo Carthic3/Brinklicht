@@ -162,8 +162,13 @@ export const QuoteWorkflow = () => {
             
             // Try different possible response structures
             if (Array.isArray(jsonResponse) && jsonResponse.length > 0) {
+              // New n8n format: [{message: {content: {Products: [...]}}}] (capital P)
+              if (jsonResponse[0].message?.content?.Products) {
+                products = jsonResponse[0].message.content.Products;
+                console.log('Found products in message.content.Products:', products);
+              }
               // Original expected format: [{message: {content: {products: [...]}}}]
-              if (jsonResponse[0].message?.content?.products) {
+              else if (jsonResponse[0].message?.content?.products) {
                 products = jsonResponse[0].message.content.products;
                 console.log('Found products in message.content.products:', products);
               }

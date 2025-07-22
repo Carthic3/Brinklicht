@@ -190,44 +190,58 @@ export const QuoteWorkflow = () => {
             }
             
             if (products && Array.isArray(products) && products.length > 0) {
-              const extractedProducts = products.map((product: any, index: number) => ({
-                id: `product-${index}`,
-                brand: product.BrandName || product.brand_name || product.Brand_Name || product.brandName || 'N/A',
-                type: product.LightType || product.light_type || product.Light_Type || product.lightType || 'Unknown',
-                sku: Array.isArray(product.SKU) ? product.SKU.join(', ') : (product.SKU || product.sku),
-                quantity: product.quantity || product.Quantity || 1,
-                verified: false,
-                specs: {
-                  wattage: product.Specs?.PowerConsumption || product.PowerConsumption || product.wattage,
-                  dimming: product.Specs?.Dimmable || product.Dimmable || product.dimming,
-                  direction: product.Specs?.direction || product.direction,
-                  colorTemperature: product.Specs?.ColorTemperature || product.ColorTemperature,
-                  color: product.Specs?.Color || product.Color,
-                  mountType: product.Specs?.MountType || product.MountType,
-                  lumen: product.Specs?.Lumen || product.Lumen,
-                  cri: product.Specs?.CRI || product.CRI,
-                  dimensions: product.Specs?.Dimensions || product.Dimensions,
-                  components: product.Components?.map((comp: any) => ({
-                    sku: comp.SKU || comp.sku,
-                    description: comp.Component_Type || comp.description,
-                    length: comp.Length || comp.length,
-                    power: comp.power,
-                    quantity: comp.Quantity || comp.quantity
-                  })) || product.components?.map((comp: any) => ({
-                    sku: comp.SKU || comp.sku,
-                    description: comp.description,
-                    length: comp.length,
-                    power: comp.power,
-                    quantity: comp.quantity
-                  })),
-                  accessories: product.accessories?.map((acc: any) => ({
-                    sku: acc.SKU || acc.sku,
-                    description: acc.description,
-                    dimming: acc.dimming,
-                    quantity: acc.quantity
-                  }))
-                }
-              }));
+              console.log('Processing products:', products);
+              const extractedProducts = products.map((product: any, index: number) => {
+                console.log(`Processing product ${index}:`, product);
+                console.log('Brand field options:', {
+                  BrandName: product.BrandName,
+                  brand_name: product.brand_name,
+                  Brand_Name: product.Brand_Name,
+                  brandName: product.brandName
+                });
+                
+                const extractedProduct = {
+                  id: `product-${index}`,
+                  brand: product.BrandName || product.brand_name || product.Brand_Name || product.brandName || 'N/A',
+                  type: product.LightType || product.light_type || product.Light_Type || product.lightType || 'Unknown',
+                  sku: Array.isArray(product.SKU) ? product.SKU.join(', ') : (product.SKU || product.sku),
+                  quantity: product.quantity || product.Quantity || 1,
+                  verified: false,
+                  specs: {
+                    wattage: product.Specs?.PowerConsumption || product.PowerConsumption || product.wattage,
+                    dimming: product.Specs?.Dimmable || product.Dimmable || product.dimming,
+                    direction: product.Specs?.direction || product.direction,
+                    colorTemperature: product.Specs?.ColorTemperature || product.ColorTemperature,
+                    color: product.Specs?.Color || product.Color,
+                    mountType: product.Specs?.MountType || product.MountType,
+                    lumen: product.Specs?.Lumen || product.Lumen,
+                    cri: product.Specs?.CRI || product.CRI,
+                    dimensions: product.Specs?.Dimensions || product.Dimensions,
+                    components: product.Components?.map((comp: any) => ({
+                      sku: comp.SKU || comp.sku,
+                      description: comp.Component_Type || comp.description,
+                      length: comp.Length || comp.length,
+                      power: comp.power,
+                      quantity: comp.Quantity || comp.quantity
+                    })) || product.components?.map((comp: any) => ({
+                      sku: comp.SKU || comp.sku,
+                      description: comp.description,
+                      length: comp.length,
+                      power: comp.power,
+                      quantity: comp.quantity
+                    })),
+                    accessories: product.accessories?.map((acc: any) => ({
+                      sku: acc.SKU || acc.sku,
+                      description: acc.description,
+                      dimming: acc.dimming,
+                      quantity: acc.quantity
+                    }))
+                  }
+                };
+                
+                console.log('Extracted product:', extractedProduct);
+                return extractedProduct;
+              });
               
               console.log('Successfully parsed products:', extractedProducts);
               updateState({ products: extractedProducts });

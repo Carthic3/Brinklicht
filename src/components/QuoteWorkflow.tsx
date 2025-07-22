@@ -205,18 +205,43 @@ export const QuoteWorkflow = () => {
                   brand: product["Brand Name"] || product.BrandName || product.brand_name || product.Brand_Name || product.brandName || 'N/A',
                   type: product["Light Type"] || product.LightType || product.light_type || product.Light_Type || product.lightType || 'Unknown',
                   sku: Array.isArray(product.SKU) ? product.SKU.join(', ') : (product.SKU || product.sku),
-                  quantity: product.quantity || product.Quantity || 1,
+                  quantity: product.Quantity || product.quantity || 1,
                   verified: false,
                   specs: {
-                    wattage: product.Specifications?.Power || product.Specs?.PowerConsumption || product.PowerConsumption || product.wattage,
+                    // Handle both new format (Specifications object) and old format (direct properties)
+                    wattage: product.Specifications?.Power || product.Specs?.PowerConsumption || product.PowerConsumption || product.Power || product.wattage,
                     dimming: product.Specifications?.Dimmable || product.Specs?.Dimmable || product.Dimmable || product.dimming,
                     direction: product.Specifications?.direction || product.Specs?.direction || product.direction,
-                    colorTemperature: product.Specifications?.["Color Temperature"] || product.Specs?.ColorTemperature || product.ColorTemperature,
+                    colorTemperature: product.Specifications?.["Color Temperature"] || product.Specs?.ColorTemperature || product.ColorTemperature || product["Color Temperature"],
                     color: product.Specifications?.Color || product.Specs?.Color || product.Color,
-                    mountType: product.Specifications?.Mounting || product.Specs?.MountType || product.MountType,
-                    lumen: product.Specifications?.Lumen || product.Specs?.Lumen || product.Lumen,
+                    mountType: (() => {
+                      const mounting = product.Specifications?.Mounting || product.Specs?.MountType || product.MountType;
+                      if (typeof mounting === 'object' && mounting !== null) {
+                        // Handle object format like {"A1/A2": "Recessed", "A3": "Surface-mounted"}
+                        return Object.values(mounting).join(', ');
+                      } else if (Array.isArray(mounting)) {
+                        // Handle array format
+                        return mounting.join(', ');
+                      }
+                      return mounting || undefined;
+                    })(),
+                    lumen: (() => {
+                      const lumen = product.Specifications?.Lumen || product.Specs?.Lumen || product.Lumen;
+                      if (typeof lumen === 'object' && lumen !== null) {
+                        // Handle object format like {"A1": 2000, "A2/A3": 4400}
+                        return Object.values(lumen).join(', ');
+                      }
+                      return lumen;
+                    })(),
                     cri: product.Specifications?.CRI || product.Specs?.CRI || product.CRI,
-                    dimensions: product.Specifications?.Dimensions || product.Specs?.Dimensions || product.Dimensions,
+                    dimensions: (() => {
+                      const dimensions = product.Specifications?.Dimensions || product.Specs?.Dimensions || product.Dimensions;
+                      if (typeof dimensions === 'object' && dimensions !== null) {
+                        // Handle object format like {"A1/A2": "D 214mm", "A3": "D 250mm x H 215mm"}
+                        return Object.values(dimensions).join(', ');
+                      }
+                      return dimensions;
+                    })(),
                     components: product.Components?.map((comp: any) => ({
                       sku: comp.SKU || comp.sku,
                       description: comp.Component_Type || comp.description,

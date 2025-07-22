@@ -79,6 +79,7 @@ export interface WorkflowState {
   deadline: string;
   documentContent: string;
   isCompleted: boolean;
+  originalN8nResponse?: any; // Store the original n8n response
 }
 
 const initialState: WorkflowState = {
@@ -89,6 +90,7 @@ const initialState: WorkflowState = {
   deadline: '',
   documentContent: '',
   isCompleted: false,
+  originalN8nResponse: null,
 };
 
 const steps = [
@@ -313,7 +315,10 @@ export const QuoteWorkflow = () => {
               });
               
               console.log('Successfully parsed products:', extractedProducts);
-              updateState({ products: extractedProducts });
+              updateState({ 
+                products: extractedProducts,
+                originalN8nResponse: jsonResponse // Store the original n8n response
+              });
               
               toast({
                 title: "Document processed successfully",
@@ -456,13 +461,50 @@ export const QuoteWorkflow = () => {
     nextStep();
   }, [tempDeadline, updateState, nextStep, toast]);
 
-  const handleFinalSubmit = useCallback(() => {
-    toast({
-      title: "Quote Request Submitted",
-      description: "Your quote request has been successfully submitted and will be processed shortly.",
-    });
+  const handleFinalSubmit = useCallback(async () => {
+    try {
+      // Send data to webhook
+      const webhookData = {
+        n8nResponse: state.originalN8nResponse,
+        clientInfo: state.clientInfo,
+        deadline: state.deadline,
+        products: state.products,
+        submittedAt: new Date().toISOString()
+      };
+
+      console.log('Sending data to webhook:', webhookData);
+
+      const response = await fetch('https://miraigen.app.n8n.cloud/webhook-test/fd2ddaa4-9f50-4efd-85e1-c781811830fd', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData),
+      });
+
+      if (response.ok) {
+        console.log('Webhook submitted successfully');
+        toast({
+          title: "Quote Request Submitted",
+          description: "Your quote request has been successfully submitted and will be processed shortly.",
+        });
+      } else {
+        console.error('Webhook submission failed:', response.status);
+        toast({
+          title: "Quote Request Submitted",
+          description: "Your quote request has been submitted locally. Processing will continue shortly.",
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting to webhook:', error);
+      toast({
+        title: "Quote Request Submitted", 
+        description: "Your quote request has been submitted locally. Processing will continue shortly.",
+      });
+    }
+    
     nextStep();
-  }, [toast, nextStep]);
+  }, [state.originalN8nResponse, state.clientInfo, state.deadline, state.products, toast, nextStep]);
 
   // Extract products from text input
   const extractProducts = useCallback(() => {

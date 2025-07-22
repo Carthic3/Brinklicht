@@ -160,8 +160,17 @@ export const QuoteWorkflow = () => {
             // More flexible parsing - handle different response structures
             let products = null;
             
+            // Handle single object response (not array) - this should be first since that's the current format
+            if (jsonResponse.message?.content?.Products) {
+              products = jsonResponse.message.content.Products;
+              console.log('Found products in single object message.content.Products:', products);
+            }
+            else if (jsonResponse.message?.content?.products) {
+              products = jsonResponse.message.content.products;
+              console.log('Found products in single object message.content.products:', products);
+            }
             // Try different possible response structures
-            if (Array.isArray(jsonResponse) && jsonResponse.length > 0) {
+            else if (Array.isArray(jsonResponse) && jsonResponse.length > 0) {
               // New n8n format: [{message: {content: {Products: [...]}}}] (capital P)
               if (jsonResponse[0].message?.content?.Products) {
                 products = jsonResponse[0].message.content.Products;

@@ -352,19 +352,14 @@ export const QuoteWorkflow = () => {
             }
           }
         } catch (corsError) {
-          console.log('CORS error occurred, falling back to no-cors mode:', corsError);
-          
-          // Fallback to no-cors mode (fire and forget)
-          await fetch('https://miraigen.app.n8n.cloud/webhook/67c28f9b-b18c-4637-8a32-c591cf759bff', {
-            method: 'POST',
-            body: formData,
-            mode: 'no-cors',
-          });
+          console.log('CORS error occurred:', corsError);
           
           toast({
-            title: "Document uploaded successfully",
-            description: `${file.name} has been sent for processing. The extracted products will need to be added manually.`,
+            title: "Upload Error - CORS Issue",
+            description: `The webhook at ${corsError.message ? corsError.message : 'the n8n endpoint'} is rejecting requests due to CORS policy. The n8n webhook needs to be configured to allow cross-origin requests from this domain.`,
+            variant: "destructive",
           });
+          
           setIsProcessing(false);
           return;
         }

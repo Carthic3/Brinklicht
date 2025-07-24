@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { ProductEditForm } from './ProductEditForm';
 import { 
   FileText, 
   Upload, 
@@ -24,7 +25,8 @@ import {
   FileCheck,
   MessageCircle,
   BarChart3,
-  Loader2
+  Loader2,
+  Edit
 } from 'lucide-react';
 
 export interface Product {
@@ -112,6 +114,7 @@ export const QuoteWorkflow = () => {
   const [tempDeadline, setTempDeadline] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const updateState = useCallback((updates: Partial<WorkflowState>) => {
@@ -443,6 +446,28 @@ export const QuoteWorkflow = () => {
         p.id === productId ? { ...p, quantity } : p
       )
     }));
+  }, []);
+
+  const handleEditProduct = useCallback((productId: string) => {
+    setEditingProductId(productId);
+  }, []);
+
+  const handleSaveProduct = useCallback((productId: string, updatedProduct: Product) => {
+    setState(prev => ({
+      ...prev,
+      products: prev.products.map(p => 
+        p.id === productId ? updatedProduct : p
+      )
+    }));
+    setEditingProductId(null);
+    toast({
+      title: "Product updated",
+      description: "Product specifications have been saved successfully.",
+    });
+  }, [toast]);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingProductId(null);
   }, []);
 
   const handleDeadlineSubmit = useCallback(() => {
@@ -846,158 +871,177 @@ export const QuoteWorkflow = () => {
                 </div>
 
                 {state.products.map((product) => (
-                  <Card key={product.id} className={`border-2 transition-all duration-200 ${
-                    product.verified ? 'border-success/30 bg-success/5' : 'border-border'
-                  }`}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold">{product.brand} {product.type}</h4>
-                            <Badge variant="outline">{product.sku}</Badge>
-                          </div>
-                          
-                          {/* Product Specs */}
-                          {product.specs && (
+                  <div key={product.id}>
+                    {editingProductId === product.id ? (
+                      <ProductEditForm
+                        product={product}
+                        onSave={handleSaveProduct}
+                        onCancel={handleCancelEdit}
+                      />
+                    ) : (
+                      <Card className={`border-2 transition-all duration-200 ${
+                        product.verified ? 'border-success/30 bg-success/5' : 'border-border'
+                      }`}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 space-y-3">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-semibold">{product.brand} {product.type}</h4>
+                                <Badge variant="outline">{product.sku}</Badge>
+                              </div>
+                              
+                              {/* Product Specs */}
+                              {product.specs && (
+                                <div className="space-y-2">
+                                  {/* Basic specs row */}
+                                  {(product.specs.dimming || product.specs.wattage || product.specs.direction || product.specs.colorTemperature || product.specs.color || product.specs.mountType) && (
+                                    <div className="flex flex-wrap gap-2">
+                                      {product.specs.wattage && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          {Array.isArray(product.specs.wattage) ? product.specs.wattage.join(', ') : product.specs.wattage}
+                                        </Badge>
+                                      )}
+                                      {product.specs.dimming && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          {product.specs.dimming}
+                                        </Badge>
+                                      )}
+                                      {product.specs.direction && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          {product.specs.direction}
+                                        </Badge>
+                                      )}
+                                      {product.specs.colorTemperature && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          {product.specs.colorTemperature}
+                                        </Badge>
+                                      )}
+                                      {product.specs.color && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          {product.specs.color}
+                                        </Badge>
+                                      )}
+                                      {product.specs.mountType && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          {Array.isArray(product.specs.mountType) ? product.specs.mountType.join(', ') : product.specs.mountType}
+                                        </Badge>
+                                      )}
+                                      {product.specs.lumen && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          {Array.isArray(product.specs.lumen) ? product.specs.lumen.join(', ') : product.specs.lumen}
+                                        </Badge>
+                                      )}
+                                      {product.specs.cri && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          CRI: {product.specs.cri}
+                                        </Badge>
+                                      )}
+                                      {product.specs.dimensions && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          {Array.isArray(product.specs.dimensions) ? product.specs.dimensions.join(', ') : product.specs.dimensions}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  )}
+                                  
+                                  {/* Components */}
+                                  {product.specs.components && product.specs.components.length > 0 && (
+                                    <div className="mt-3 p-3 bg-accent/50 rounded-md">
+                                      <h5 className="text-sm font-medium mb-2">Components:</h5>
+                                      <div className="space-y-1">
+                                        {product.specs.components.map((comp, index) => (
+                                          <div key={index} className="flex justify-between items-center text-xs">
+                                            <div className="flex items-center gap-2">
+                                              <Badge variant="outline" className="text-xs">{comp.sku}</Badge>
+                                              <span>{comp.description}</span>
+                                              {comp.length && <span className="text-muted-foreground">({comp.length})</span>}
+                                              {comp.power && <span className="text-muted-foreground">({comp.power})</span>}
+                                            </div>
+                                            <span className="text-muted-foreground">Qty: {comp.quantity}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Accessories */}
+                                  {product.specs.accessories && product.specs.accessories.length > 0 && (
+                                    <div className="mt-3 p-3 bg-accent/30 rounded-md">
+                                      <h5 className="text-sm font-medium mb-2">Accessories:</h5>
+                                      <div className="space-y-1">
+                                        {product.specs.accessories.map((acc, index) => (
+                                          <div key={index} className="flex justify-between items-center text-xs">
+                                            <div className="flex items-center gap-2">
+                                              <Badge variant="outline" className="text-xs">{acc.sku}</Badge>
+                                              <span>{acc.description}</span>
+                                              {acc.dimming && <span className="text-muted-foreground">({acc.dimming})</span>}
+                                            </div>
+                                            <span className="text-muted-foreground">Qty: {acc.quantity}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              
+                              {product.url && (
+                                <a 
+                                  href={product.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                                >
+                                  View Product Page
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              )}
+
+                              <div className="flex items-center gap-4">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`quantity-${product.id}`} className="text-sm">Quantity</Label>
+                                  <Input
+                                    id={`quantity-${product.id}`}
+                                    type="number"
+                                    min="1"
+                                    value={product.quantity}
+                                    onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value) || 1)}
+                                    className="w-20"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
                             <div className="space-y-2">
-                              {/* Basic specs row */}
-                              {(product.specs.dimming || product.specs.wattage || product.specs.direction || product.specs.colorTemperature || product.specs.color || product.specs.mountType) && (
-                                <div className="flex flex-wrap gap-2">
-                                  {product.specs.wattage && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {Array.isArray(product.specs.wattage) ? product.specs.wattage.join(', ') : product.specs.wattage}
-                                    </Badge>
-                                  )}
-                                  {product.specs.dimming && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {product.specs.dimming}
-                                    </Badge>
-                                  )}
-                                  {product.specs.direction && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {product.specs.direction}
-                                    </Badge>
-                                  )}
-                                  {product.specs.colorTemperature && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {product.specs.colorTemperature}
-                                    </Badge>
-                                  )}
-                                  {product.specs.color && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {product.specs.color}
-                                    </Badge>
-                                  )}
-                                  {product.specs.mountType && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {Array.isArray(product.specs.mountType) ? product.specs.mountType.join(', ') : product.specs.mountType}
-                                    </Badge>
-                                  )}
-                                  {product.specs.lumen && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {Array.isArray(product.specs.lumen) ? product.specs.lumen.join(', ') : product.specs.lumen}
-                                    </Badge>
-                                  )}
-                                  {product.specs.cri && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      CRI: {product.specs.cri}
-                                    </Badge>
-                                  )}
-                                  {product.specs.dimensions && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {Array.isArray(product.specs.dimensions) ? product.specs.dimensions.join(', ') : product.specs.dimensions}
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
-                              
-                              {/* Components */}
-                              {product.specs.components && product.specs.components.length > 0 && (
-                                <div className="mt-3 p-3 bg-accent/50 rounded-md">
-                                  <h5 className="text-sm font-medium mb-2">Components:</h5>
-                                  <div className="space-y-1">
-                                    {product.specs.components.map((comp, index) => (
-                                      <div key={index} className="flex justify-between items-center text-xs">
-                                        <div className="flex items-center gap-2">
-                                          <Badge variant="outline" className="text-xs">{comp.sku}</Badge>
-                                          <span>{comp.description}</span>
-                                          {comp.length && <span className="text-muted-foreground">({comp.length})</span>}
-                                          {comp.power && <span className="text-muted-foreground">({comp.power})</span>}
-                                        </div>
-                                        <span className="text-muted-foreground">Qty: {comp.quantity}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {/* Accessories */}
-                              {product.specs.accessories && product.specs.accessories.length > 0 && (
-                                <div className="mt-3 p-3 bg-accent/30 rounded-md">
-                                  <h5 className="text-sm font-medium mb-2">Accessories:</h5>
-                                  <div className="space-y-1">
-                                    {product.specs.accessories.map((acc, index) => (
-                                      <div key={index} className="flex justify-between items-center text-xs">
-                                        <div className="flex items-center gap-2">
-                                          <Badge variant="outline" className="text-xs">{acc.sku}</Badge>
-                                          <span>{acc.description}</span>
-                                          {acc.dimming && <span className="text-muted-foreground">({acc.dimming})</span>}
-                                        </div>
-                                        <span className="text-muted-foreground">Qty: {acc.quantity}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          
-                          {product.url && (
-                            <a 
-                              href={product.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                            >
-                              View Product Page
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                          )}
-
-                          <div className="flex items-center gap-4">
-                            <div className="space-y-1">
-                              <Label htmlFor={`quantity-${product.id}`} className="text-sm">Quantity</Label>
-                              <Input
-                                id={`quantity-${product.id}`}
-                                type="number"
-                                min="1"
-                                value={product.quantity}
-                                onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value) || 1)}
-                                className="w-20"
-                              />
+                              <Button
+                                onClick={() => handleEditProduct(product.id)}
+                                variant="outline"
+                                size="sm"
+                                className="gap-2"
+                              >
+                                <Edit className="h-4 w-4" />
+                                Edit
+                              </Button>
+                              <Button
+                                onClick={() => handleProductVerification(product.id, !product.verified)}
+                                variant={product.verified ? "success" : "outline"}
+                                size="sm"
+                              >
+                                {product.verified ? (
+                                  <>
+                                    <CheckCircle className="h-4 w-4" />
+                                    Verified
+                                  </>
+                                ) : (
+                                  'Verify'
+                                )}
+                              </Button>
                             </div>
                           </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Button
-                            onClick={() => handleProductVerification(product.id, !product.verified)}
-                            variant={product.verified ? "success" : "outline"}
-                            size="sm"
-                          >
-                            {product.verified ? (
-                              <>
-                                <CheckCircle className="h-4 w-4" />
-                                Verified
-                              </>
-                            ) : (
-                              'Verify'
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
                 ))}
 
                 <div className="flex gap-3 pt-4">

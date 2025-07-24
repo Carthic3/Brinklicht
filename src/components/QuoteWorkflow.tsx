@@ -69,6 +69,9 @@ export interface ClientInfo {
   email: string;
   projectName: string;
   isExisting: boolean;
+  projectPhase?: string;
+  otherBrandsComfortable?: boolean;
+  position?: string;
 }
 
 export interface WorkflowState {
@@ -395,7 +398,7 @@ export const QuoteWorkflow = () => {
 
   const handleClientInfoSubmit = useCallback(() => {
     if (!tempClientInfo.isExisting) {
-      if (!tempClientInfo.fullName || !tempClientInfo.companyName || !tempClientInfo.email || !tempClientInfo.projectName) {
+      if (!tempClientInfo.fullName || !tempClientInfo.companyName || !tempClientInfo.email || !tempClientInfo.projectName || !tempClientInfo.projectPhase || !tempClientInfo.position) {
         toast({
           title: "Missing Information",
           description: "Please fill in all required fields for new clients.",
@@ -404,10 +407,10 @@ export const QuoteWorkflow = () => {
         return;
       }
     } else {
-      if (!tempClientInfo.email) {
+      if (!tempClientInfo.email || !tempClientInfo.projectPhase || !tempClientInfo.position) {
         toast({
           title: "Missing Information",
-          description: "Please provide your email address.",
+          description: "Please fill in all required fields.",
           variant: "destructive",
         });
         return;
@@ -648,20 +651,59 @@ export const QuoteWorkflow = () => {
             ) : (
               <Card>
                 <CardContent className="p-6 space-y-4">
-                  {tempClientInfo.isExisting ? (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">Welcome Back!</h3>
-                      <div className="space-y-2">
-                        <Label htmlFor="existing-email">Email Address</Label>
-                        <Input
-                          id="existing-email"
-                          type="email"
-                          placeholder="your.email@company.com"
-                          value={tempClientInfo.email || ''}
-                          onChange={(e) => setTempClientInfo(prev => ({ ...prev, email: e.target.value }))}
-                        />
-                      </div>
-                    </div>
+                   {tempClientInfo.isExisting ? (
+                     <div className="space-y-4">
+                       <h3 className="text-lg font-semibold">Welcome Back!</h3>
+                       <div className="space-y-2">
+                         <Label htmlFor="existing-email">Email Address</Label>
+                         <Input
+                           id="existing-email"
+                           type="email"
+                           placeholder="your.email@company.com"
+                           value={tempClientInfo.email || ''}
+                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, email: e.target.value }))}
+                         />
+                       </div>
+                       <div className="space-y-2">
+                         <Label htmlFor="existing-project-phase">In what phase of the project are you in? *</Label>
+                         <select
+                           id="existing-project-phase"
+                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                           value={tempClientInfo.projectPhase || ''}
+                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, projectPhase: e.target.value }))}
+                         >
+                           <option value="">Select phase</option>
+                           <option value="beginning">Beginning</option>
+                           <option value="middle">Middle</option>
+                           <option value="end">End</option>
+                         </select>
+                       </div>
+                       <div className="space-y-2">
+                         <Label htmlFor="existing-other-brands">Are you comfortable using lights from other brands?</Label>
+                         <div className="flex items-center space-x-2">
+                           <input
+                             type="checkbox"
+                             id="existing-other-brands"
+                             className="h-4 w-4 rounded border border-input bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                             checked={tempClientInfo.otherBrandsComfortable || false}
+                             onChange={(e) => setTempClientInfo(prev => ({ ...prev, otherBrandsComfortable: e.target.checked }))}
+                           />
+                           <Label htmlFor="existing-other-brands" className="text-sm font-normal">
+                             Yes, I'm comfortable with other brands
+                           </Label>
+                         </div>
+                       </div>
+                       <div className="space-y-2">
+                         <Label htmlFor="existing-position">What position are you? *</Label>
+                         <Input
+                           id="existing-position"
+                           placeholder="Project Manager"
+                           maxLength={25}
+                           value={tempClientInfo.position || ''}
+                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, position: e.target.value }))}
+                         />
+                       </div>
+                     </div>
                   ) : (
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">New Account Setup</h3>
@@ -695,15 +737,54 @@ export const QuoteWorkflow = () => {
                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, email: e.target.value }))}
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="project-name">Project Name *</Label>
-                        <Input
-                          id="project-name"
-                          placeholder="Office Equipment Upgrade Q1 2024"
-                          value={tempClientInfo.projectName || ''}
-                          onChange={(e) => setTempClientInfo(prev => ({ ...prev, projectName: e.target.value }))}
-                        />
-                      </div>
+                       <div className="space-y-2">
+                         <Label htmlFor="project-name">Project Name *</Label>
+                         <Input
+                           id="project-name"
+                           placeholder="Office Equipment Upgrade Q1 2024"
+                           value={tempClientInfo.projectName || ''}
+                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, projectName: e.target.value }))}
+                         />
+                       </div>
+                       <div className="space-y-2">
+                         <Label htmlFor="project-phase">In what phase of the project are you in? *</Label>
+                         <select
+                           id="project-phase"
+                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                           value={tempClientInfo.projectPhase || ''}
+                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, projectPhase: e.target.value }))}
+                         >
+                           <option value="">Select phase</option>
+                           <option value="beginning">Beginning</option>
+                           <option value="middle">Middle</option>
+                           <option value="end">End</option>
+                         </select>
+                       </div>
+                       <div className="space-y-2">
+                         <Label htmlFor="other-brands">Are you comfortable using lights from other brands?</Label>
+                         <div className="flex items-center space-x-2">
+                           <input
+                             type="checkbox"
+                             id="other-brands"
+                             className="h-4 w-4 rounded border border-input bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                             checked={tempClientInfo.otherBrandsComfortable || false}
+                             onChange={(e) => setTempClientInfo(prev => ({ ...prev, otherBrandsComfortable: e.target.checked }))}
+                           />
+                           <Label htmlFor="other-brands" className="text-sm font-normal">
+                             Yes, I'm comfortable with other brands
+                           </Label>
+                         </div>
+                       </div>
+                       <div className="space-y-2">
+                         <Label htmlFor="position">What position are you? *</Label>
+                         <Input
+                           id="position"
+                           placeholder="Project Manager"
+                           maxLength={25}
+                           value={tempClientInfo.position || ''}
+                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, position: e.target.value }))}
+                         />
+                       </div>
                     </div>
                   )}
                   

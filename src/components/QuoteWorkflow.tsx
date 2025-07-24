@@ -469,7 +469,7 @@ export const QuoteWorkflow = () => {
 
       console.log('Sending data to webhook:', webhookData);
 
-      const response = await fetch('https://miraigen.app.n8n.cloud/webhook-test/fd2ddaa4-9f50-4efd-85e1-c781811830fd', {
+      const response = await fetch('https://miraigen.app.n8n.cloud/webhook-test/09834288-d59a-40ed-a860-a636ce415de3', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

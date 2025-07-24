@@ -148,7 +148,7 @@ export const QuoteWorkflow = () => {
         // First try with normal fetch to get response
         let response;
         try {
-          response = await fetch('https://miraigen.app.n8n.cloud/webhook/67c28f9b-b18c-4637-8a32-c591cf759bff', {
+          response = await fetch('https://miraigen.app.n8n.cloud/webhook-test/67c28f9b-b18c-4637-8a32-c591cf759bff', {
             method: 'POST',
             body: formData,
           });

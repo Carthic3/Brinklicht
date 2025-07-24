@@ -679,6 +679,16 @@ export const QuoteWorkflow = () => {
                          </select>
                        </div>
                        <div className="space-y-2">
+                         <Label htmlFor="existing-position">What position are you? *</Label>
+                         <Input
+                           id="existing-position"
+                           placeholder="Project Manager"
+                           maxLength={25}
+                           value={tempClientInfo.position || ''}
+                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, position: e.target.value }))}
+                         />
+                       </div>
+                       <div className="space-y-2">
                          <Label htmlFor="existing-other-brands">Are you comfortable using lights from other brands?</Label>
                          <div className="flex items-center space-x-2">
                            <input
@@ -692,16 +702,6 @@ export const QuoteWorkflow = () => {
                              Yes, I'm comfortable with other brands
                            </Label>
                          </div>
-                       </div>
-                       <div className="space-y-2">
-                         <Label htmlFor="existing-position">What position are you? *</Label>
-                         <Input
-                           id="existing-position"
-                           placeholder="Project Manager"
-                           maxLength={25}
-                           value={tempClientInfo.position || ''}
-                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, position: e.target.value }))}
-                         />
                        </div>
                      </div>
                   ) : (
@@ -761,6 +761,16 @@ export const QuoteWorkflow = () => {
                          </select>
                        </div>
                        <div className="space-y-2">
+                         <Label htmlFor="position">What position are you? *</Label>
+                         <Input
+                           id="position"
+                           placeholder="Project Manager"
+                           maxLength={25}
+                           value={tempClientInfo.position || ''}
+                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, position: e.target.value }))}
+                         />
+                       </div>
+                       <div className="space-y-2">
                          <Label htmlFor="other-brands">Are you comfortable using lights from other brands?</Label>
                          <div className="flex items-center space-x-2">
                            <input
@@ -774,16 +784,6 @@ export const QuoteWorkflow = () => {
                              Yes, I'm comfortable with other brands
                            </Label>
                          </div>
-                       </div>
-                       <div className="space-y-2">
-                         <Label htmlFor="position">What position are you? *</Label>
-                         <Input
-                           id="position"
-                           placeholder="Project Manager"
-                           maxLength={25}
-                           value={tempClientInfo.position || ''}
-                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, position: e.target.value }))}
-                         />
                        </div>
                     </div>
                   )}

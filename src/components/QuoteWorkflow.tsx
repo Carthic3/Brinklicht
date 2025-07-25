@@ -180,13 +180,13 @@ export const QuoteWorkflow = () => {
             let products = null;
             
             // Handle single object response (not array) - this should be first since that's the current format
-            if (jsonResponse.message?.content?.OrderDetails) {
-              products = jsonResponse.message.content.OrderDetails;
-              console.log('Found products in single object message.content.OrderDetails:', products);
-            }
-            else if (jsonResponse.message?.content?.Products) {
+            if (jsonResponse.message?.content?.Products) {
               products = jsonResponse.message.content.Products;
               console.log('Found products in single object message.content.Products:', products);
+            }
+            else if (jsonResponse.message?.content?.OrderDetails) {
+              products = jsonResponse.message.content.OrderDetails;
+              console.log('Found products in single object message.content.OrderDetails:', products);
             }
             else if (jsonResponse.message?.content?.products) {
               products = jsonResponse.message.content.products;
@@ -194,15 +194,15 @@ export const QuoteWorkflow = () => {
             }
             // Try different possible response structures
             else if (Array.isArray(jsonResponse) && jsonResponse.length > 0) {
-              // New n8n format: [{message: {content: {OrderDetails: [...]}}}]
-              if (jsonResponse[0].message?.content?.OrderDetails) {
-                products = jsonResponse[0].message.content.OrderDetails;
-                console.log('Found products in message.content.OrderDetails:', products);
-              }
               // New n8n format: [{message: {content: {Products: [...]}}}] (capital P)
-              else if (jsonResponse[0].message?.content?.Products) {
+              if (jsonResponse[0].message?.content?.Products) {
                 products = jsonResponse[0].message.content.Products;
                 console.log('Found products in message.content.Products:', products);
+              }
+              // New n8n format: [{message: {content: {OrderDetails: [...]}}}]
+              else if (jsonResponse[0].message?.content?.OrderDetails) {
+                products = jsonResponse[0].message.content.OrderDetails;
+                console.log('Found products in message.content.OrderDetails:', products);
               }
               // Original expected format: [{message: {content: {products: [...]}}}]
               else if (jsonResponse[0].message?.content?.products) {

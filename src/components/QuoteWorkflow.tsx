@@ -779,10 +779,9 @@ export const QuoteWorkflow = () => {
                            value={tempClientInfo.projectPhase || ''}
                            onChange={(e) => setTempClientInfo(prev => ({ ...prev, projectPhase: e.target.value }))}
                          >
-                           <option value="">Select phase</option>
-                           <option value="beginning">Beginning</option>
-                           <option value="middle">Middle</option>
-                           <option value="end">End</option>
+                        <option value="">Select phase</option>
+                        <option value="preliminary">Preliminary</option>
+                        <option value="final">Final</option>
                          </select>
                        </div>
                        <div className="space-y-2">

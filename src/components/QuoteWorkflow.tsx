@@ -74,6 +74,7 @@ export interface ClientInfo {
   projectPhase?: string;
   otherBrandsComfortable?: boolean;
   position?: string;
+  otherPosition?: string;
 }
 
 export interface WorkflowState {
@@ -401,7 +402,7 @@ export const QuoteWorkflow = () => {
 
   const handleClientInfoSubmit = useCallback(() => {
     if (!tempClientInfo.isExisting) {
-      if (!tempClientInfo.fullName || !tempClientInfo.companyName || !tempClientInfo.email || !tempClientInfo.projectName || !tempClientInfo.projectPhase || !tempClientInfo.position) {
+      if (!tempClientInfo.fullName || !tempClientInfo.companyName || !tempClientInfo.email || !tempClientInfo.projectName || !tempClientInfo.projectPhase || !tempClientInfo.position || (tempClientInfo.position === 'other' && !tempClientInfo.otherPosition)) {
         toast({
           title: "Missing Information",
           description: "Please fill in all required fields for new clients.",
@@ -410,7 +411,7 @@ export const QuoteWorkflow = () => {
         return;
       }
     } else {
-      if (!tempClientInfo.email || !tempClientInfo.projectPhase || !tempClientInfo.position) {
+      if (!tempClientInfo.email || !tempClientInfo.projectPhase || !tempClientInfo.position || (tempClientInfo.position === 'other' && !tempClientInfo.otherPosition)) {
         toast({
           title: "Missing Information",
           description: "Please fill in all required fields.",
@@ -704,14 +705,27 @@ export const QuoteWorkflow = () => {
                          </select>
                        </div>
                        <div className="space-y-2">
-                         <Label htmlFor="existing-position">What position are you? *</Label>
-                         <Input
-                           id="existing-position"
-                           placeholder="Project Manager"
-                           maxLength={25}
-                           value={tempClientInfo.position || ''}
-                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, position: e.target.value }))}
-                         />
+                          <Label htmlFor="existing-position">What position are you? *</Label>
+                          <select
+                            id="existing-position"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={tempClientInfo.position || ''}
+                            onChange={(e) => setTempClientInfo(prev => ({ ...prev, position: e.target.value }))}
+                          >
+                            <option value="">Select position</option>
+                            <option value="calculator">Calculator</option>
+                            <option value="planner">Planner</option>
+                            <option value="contractor">Contractor</option>
+                            <option value="other">Other</option>
+                          </select>
+                          {tempClientInfo.position === 'other' && (
+                            <Input
+                              placeholder="Please specify your position"
+                              maxLength={25}
+                              value={tempClientInfo.otherPosition || ''}
+                              onChange={(e) => setTempClientInfo(prev => ({ ...prev, otherPosition: e.target.value }))}
+                            />
+                          )}
                        </div>
                        <div className="space-y-2">
                          <Label htmlFor="existing-other-brands">Are you comfortable using lights from other brands?</Label>
@@ -785,14 +799,27 @@ export const QuoteWorkflow = () => {
                          </select>
                        </div>
                        <div className="space-y-2">
-                         <Label htmlFor="position">What position are you? *</Label>
-                         <Input
-                           id="position"
-                           placeholder="Project Manager"
-                           maxLength={25}
-                           value={tempClientInfo.position || ''}
-                           onChange={(e) => setTempClientInfo(prev => ({ ...prev, position: e.target.value }))}
-                         />
+                          <Label htmlFor="position">What position are you? *</Label>
+                          <select
+                            id="position"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={tempClientInfo.position || ''}
+                            onChange={(e) => setTempClientInfo(prev => ({ ...prev, position: e.target.value }))}
+                          >
+                            <option value="">Select position</option>
+                            <option value="calculator">Calculator</option>
+                            <option value="planner">Planner</option>
+                            <option value="contractor">Contractor</option>
+                            <option value="other">Other</option>
+                          </select>
+                          {tempClientInfo.position === 'other' && (
+                            <Input
+                              placeholder="Please specify your position"
+                              maxLength={25}
+                              value={tempClientInfo.otherPosition || ''}
+                              onChange={(e) => setTempClientInfo(prev => ({ ...prev, otherPosition: e.target.value }))}
+                            />
+                          )}
                        </div>
                        <div className="space-y-2">
                          <Label htmlFor="other-brands">Are you comfortable using lights from other brands?</Label>

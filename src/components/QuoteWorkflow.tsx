@@ -184,14 +184,6 @@ export const QuoteWorkflow = () => {
               products = jsonResponse.message.content.Products;
               console.log('Found products in single object message.content.Products:', products);
             }
-            else if (jsonResponse.message?.content?.OrderDetails) {
-              products = jsonResponse.message.content.OrderDetails;
-              console.log('Found products in single object message.content.OrderDetails:', products);
-            }
-            else if (jsonResponse.message?.content?.products) {
-              products = jsonResponse.message.content.products;
-              console.log('Found products in single object message.content.products:', products);
-            }
             // Try different possible response structures
             else if (Array.isArray(jsonResponse) && jsonResponse.length > 0) {
               // New n8n format: [{message: {content: {Products: [...]}}}] (capital P)
@@ -199,31 +191,11 @@ export const QuoteWorkflow = () => {
                 products = jsonResponse[0].message.content.Products;
                 console.log('Found products in message.content.Products:', products);
               }
-              // New n8n format: [{message: {content: {OrderDetails: [...]}}}]
-              else if (jsonResponse[0].message?.content?.OrderDetails) {
-                products = jsonResponse[0].message.content.OrderDetails;
-                console.log('Found products in message.content.OrderDetails:', products);
-              }
-              // Original expected format: [{message: {content: {products: [...]}}}]
-              else if (jsonResponse[0].message?.content?.products) {
-                products = jsonResponse[0].message.content.products;
-                console.log('Found products in message.content.products:', products);
-              }
-              // Direct array format: [{products: [...]}]
-              else if (jsonResponse[0].products) {
-                products = jsonResponse[0].products;
-                console.log('Found products in direct products array:', products);
-              }
             }
-            // Direct products array: {products: [...]}
-            else if (jsonResponse.products) {
-              products = jsonResponse.products;
-              console.log('Found products in direct products object:', products);
-            }
-            // Direct array of products: [{sku: ..., quantity: ...}, ...]
-            else if (Array.isArray(jsonResponse) && jsonResponse[0]?.sku) {
-              products = jsonResponse;
-              console.log('Found direct products array:', products);
+            // Direct object format: {Products: [...]}
+            else if (jsonResponse.Products) {
+              products = jsonResponse.Products;
+              console.log('Found products in direct Products property:', products);
             }
             // Handle single response object format
             else if (jsonResponse.message?.content?.products) {

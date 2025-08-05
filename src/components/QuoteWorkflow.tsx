@@ -498,8 +498,8 @@ export const QuoteWorkflow = () => {
       });
     }
     
-    // Navigate directly to dashboard after successful submission
-    navigate('/dashboard');
+    // Set completion state to show confirmation page
+    updateState({ isCompleted: true });
   }, [state.originalN8nResponse, state.clientInfo, state.deadline, state.products, toast, navigate]);
 
   // Extract products from text input

@@ -122,6 +122,7 @@ export const QuoteWorkflow = () => {
     setState(prev => {
       const newState = { ...prev, ...updates };
       console.log('New state after update:', newState);
+      console.log('isCompleted value:', newState.isCompleted);
       return newState;
     });
   }, []);
@@ -457,6 +458,9 @@ export const QuoteWorkflow = () => {
   }, [tempDeadline, updateState, nextStep, toast]);
 
   const handleFinalSubmit = useCallback(async () => {
+    console.log('=== FINAL SUBMIT CLICKED ===');
+    console.log('Current state before submit:', state);
+    
     try {
       // Send data to webhook
       const webhookData = {
@@ -498,8 +502,10 @@ export const QuoteWorkflow = () => {
       });
     }
     
+    console.log('About to set isCompleted to true...');
     // Set completion state to show confirmation page
     updateState({ isCompleted: true });
+    console.log('=== SUBMIT COMPLETE - Should show confirmation page ===');
   }, [state.originalN8nResponse, state.clientInfo, state.deadline, state.products, toast, updateState]);
 
   // Extract products from text input

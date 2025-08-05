@@ -1217,7 +1217,13 @@ export const QuoteWorkflow = () => {
                     Back to Edit
                   </Button>
                   <Button
-                    onClick={handleFinalSubmit}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Submit button clicked!');
+                      handleFinalSubmit();
+                    }}
                     variant="professional"
                     size="lg"
                     className="flex-1"

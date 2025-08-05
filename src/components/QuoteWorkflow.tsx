@@ -500,7 +500,7 @@ export const QuoteWorkflow = () => {
     
     // Set completion state to show confirmation page
     updateState({ isCompleted: true });
-  }, [state.originalN8nResponse, state.clientInfo, state.deadline, state.products, toast, navigate]);
+  }, [state.originalN8nResponse, state.clientInfo, state.deadline, state.products, toast, updateState]);
 
   // Extract products from text input
   const extractProducts = useCallback(() => {
